@@ -1,27 +1,21 @@
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.swrlapi.exceptions.SWRLBuiltInException;
 import org.swrlapi.parser.SWRLParseException;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
-public class Main {
-    public static boolean end = false;
+public class InputOutput {
     public static boolean ok = false;
     public static String eqName;
     public static String fauName;
+    private Ontologing ontologing;
 
+    public InputOutput(Ontologing ontologing) throws SWRLParseException, SWRLBuiltInException {
+        this.ontologing = ontologing;
+    }
 
-    public static void main(String[] args) throws SWRLParseException, SWRLBuiltInException {
-        OntPreps inputOnt = new OntPreps();
-        inputOnt.fileOpen("src/main/resources/ontDetProt.owl");
-        inputOnt.ontologyProcessing();
-        Ontologing ontologing = new Ontologing(inputOnt.returnOntObjects());
-        ontologing.getHierarchyTree();
-
+    public void go(){
         System.out.println("Here are some pieces of substation equipment to check protection on: ");
         for (int i = 0; i < ontologing.getEqIndls().size(); i++) {
             if (i % 10 == 0 && i != 0) {
@@ -32,8 +26,12 @@ public class Main {
         System.out.print("\n");
         while (ok == false) {
             System.out.print("Enter your choice for the equipment: ");
-            Scanner scanner = new Scanner(System.in);
-            eqName = scanner.next();
+            BufferedReader eq = new BufferedReader(new InputStreamReader(System.in));
+            try {
+                eqName = eq.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ok = ontologing.ifEqOccurs(ontologing.eqClass, eqName);
             if (ok) {
                 System.out.println("Nice!");
@@ -52,8 +50,12 @@ public class Main {
         System.out.print("\n");
         while (ok == false) {
             System.out.print("Enter your choice for the fault: ");
-            Scanner scanner = new Scanner(System.in);
-            fauName = scanner.next();
+            BufferedReader fau = new BufferedReader(new InputStreamReader(System.in));
+            try {
+                fauName = fau.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ok = ontologing.ifEqOccurs(ontologing.faultClass, fauName);
             if (ok) {
                 System.out.println("Nice!");
@@ -64,9 +66,13 @@ public class Main {
         ok = false;
         eqName = null;
         ontologing.propertyAssertion();
-        ontologing.ruleApplying();
+        try {
+            ontologing.ruleApplying();
+        } catch (SWRLBuiltInException e) {
+            e.printStackTrace();
+        } catch (SWRLParseException e) {
+            e.printStackTrace();
+        }
         ontologing.getProtectionsActed();
-        System.out.println("DONE!");
     }
 }
-

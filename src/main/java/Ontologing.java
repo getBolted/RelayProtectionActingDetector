@@ -113,7 +113,6 @@ public class Ontologing {
 
     public void removeInferredAxioms(){
         manager.removeAxioms(ontology, inferredAxioms);
-        System.out.println("Removing recent axioms for the next try: ");
-        inferredAxioms.forEach(System.out::println);
+        System.out.println("Removing recent axioms for the next try! ");
     }
 }
