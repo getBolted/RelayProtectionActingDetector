@@ -4,15 +4,14 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.swrlapi.core.SWRLAPIRule;
 import org.swrlapi.core.SWRLRuleEngine;
+import org.swrlapi.drools.owl.axioms.A;
 import org.swrlapi.exceptions.SWRLBuiltInException;
 import org.swrlapi.factory.SWRLAPIFactory;
 import org.swrlapi.parser.SWRLParseException;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 public class Ontologing {
     public static String faultName;
@@ -24,6 +23,8 @@ public class Ontologing {
     private OWLOntology ontology;
     public OWLClass eqClass;
     public OWLClass faultClass;
+    private ArrayList<String> eqIndls = new ArrayList<>();
+    private ArrayList<String> fauIndls = new ArrayList<>();
 
     private ArrayList<String> items = new ArrayList<String>();
     private Set<OWLAxiom> inferredAxioms;
@@ -37,6 +38,14 @@ public class Ontologing {
         this.manager = (OWLOntologyManager) args[5];
         this.eqClass = dataFactory.getOWLClass(IRI.create(ontNameSpace + "Equipment"));
         this.faultClass = dataFactory.getOWLClass(IRI.create(ontNameSpace + "Fault"));
+    }
+
+    public ArrayList<String> getEqIndls() {
+        return eqIndls;
+    }
+
+    public ArrayList<String> getFauIndls() {
+        return fauIndls;
     }
 
     private ArrayList<String> getIndividualsByClass (OWLClass owlClass, OWLReasoner owlReasoner){
@@ -68,7 +77,7 @@ public class Ontologing {
                 dataFactory.getOWLObjectPropertyAssertionAxiom(isOn, fauIndividual, eqIndividual );
         AddAxiom isONFunctionAxiom = new AddAxiom(ontology, isOn_propertyAssertion);
         manager.applyChange(isONFunctionAxiom);
-        System.out.println(items.get(1) + " now is on" + items.get(0));
+        System.out.println(items.get(1) + " now is on " + items.get(0));
     }
 
     public void ruleApplying() throws SWRLBuiltInException, SWRLParseException {
@@ -97,4 +106,14 @@ public class Ontologing {
         actedProts.forEach(System.out::println);
     }
 
+    public void getHierarchyTree(){
+        GetDataFromOntology.getIndividualsOfClass(eqClass, reasoner).forEach(ind -> eqIndls.add(ind.getIRI().getShortForm()));
+        GetDataFromOntology.getIndividualsOfClass(faultClass, reasoner).forEach(ind -> fauIndls.add(ind.getIRI().getShortForm()));
+    }
+
+    public void removeInferredAxioms(){
+        manager.removeAxioms(ontology, inferredAxioms);
+        System.out.println("Removing recent axioms for the next try: ");
+        inferredAxioms.forEach(System.out::println);
+    }
 }

@@ -19,34 +19,54 @@ public class Main {
         inputOnt.fileOpen("src/main/resources/ontDetProt.owl");
         inputOnt.ontologyProcessing();
         Ontologing ontologing = new Ontologing(inputOnt.returnOntObjects());
+        ontologing.getHierarchyTree();
 
-            while (ok == false){
-                System.out.println("Enter Equipment: ");
+        while (end == false) {
+            while (ok == false) {
+                System.out.println("Here are some pieces of substation equipment to check protection on: ");
+                ontologing.getEqIndls().forEach(System.out::println);
+                System.out.print("Enter your choice for the equipment:");
                 Scanner eq = new Scanner(System.in);
                 eqName = eq.next();
                 ok = ontologing.ifEqOccurs(ontologing.eqClass, eqName);
-                if (ok){
+                if (ok) {
                     System.out.println("Nice!");
-                }else {
+                } else {
                     System.out.println("Bad try! Repeat again!");
                 }
             }
             ok = false;
-            while (ok == false){
-                System.out.println("Enter Fault: ");
+            while (ok == false) {
+                System.out.println("And also faults list:");
+                ontologing.getFauIndls().forEach(System.out::println);
+                System.out.print("Enter your choice for the fault:");
                 Scanner fau = new Scanner(System.in);
                 fauName = fau.next();
                 ok = ontologing.ifEqOccurs(ontologing.faultClass, fauName);
-                if (ok){
+                if (ok) {
                     System.out.println("Nice!");
                 } else {
-                System.out.println("Bad try! Repeat again!");
+                    System.out.println("Bad try! Repeat again!");
                 }
             }
             ok = false;
             ontologing.propertyAssertion();
             ontologing.ruleApplying();
             ontologing.getProtectionsActed();
+
+            System.out.println("That's all? 1/0");
+            Scanner endScan = new Scanner(System.in);
+            int yn = endScan.nextInt();
+            if (yn == 0){
+                ontologing.removeInferredAxioms();
+            }else if (yn == 1){
+                System.out.println("Bye!");
+                end = true;
+            }else {
+                System.out.println("Is it really hard to enter just 1 or 0??? Bye again!");
+                end = true;
+            }
+        }
     }
 }
 
